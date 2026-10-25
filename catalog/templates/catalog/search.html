@@ -1,0 +1,139 @@
+
+{% extends "catalog/base.html" %}
+
+{% block title %}Search Study Materials | iTestPapers{% endblock %}
+
+{% block content %}
+<header class="mb-4">
+    <div class="eyebrow">Study library</div>
+    <h1 class="display-6 fw-bold">Find Study Materials</h1>
+    <p class="text-secondary">
+        Search by title, subject, chapter or description.
+    </p>
+</header>
+
+<form method="get" class="bg-white border rounded-4 p-3 p-md-4 mb-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-12 col-md-7">
+            <label for="search-query" class="form-label">Search</label>
+            <input
+                id="search-query"
+                type="search"
+                name="q"
+                value="{{ query }}"
+                class="form-control"
+                placeholder="e.g. Algebra practice questions"
+            >
+        </div>
+
+        <div class="col-12 col-md-3">
+            <label for="material-type" class="form-label">
+                Material type
+            </label>
+            <select id="material-type" name="type" class="form-select">
+                <option value="">All types</option>
+                {% for value, label in material_types %}
+                    <option
+                        value="{{ value }}"
+                        {% if selected_type == value %}selected{% endif %}
+                    >
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-12 col-md-2">
+            <button class="btn btn-primary w-100" type="submit">
+                Search
+            </button>
+        </div>
+    </div>
+</form>
+
+<p class="text-secondary">
+    {{ page_obj.paginator.count }}
+    result{{ page_obj.paginator.count|pluralize }}
+</p>
+
+<div class="d-flex flex-column gap-3">
+    {% for material in page_obj %}
+        <article class="material-row">
+            <div class="eyebrow mb-2">
+                {{ material.get_material_type_display }}
+            </div>
+
+            <h2 class="h5 fw-bold">
+                <a
+                    class="text-decoration-none"
+                    href="{% url 'catalog:chapter_detail' material.chapter.subject.slug material.chapter.slug %}"
+                >
+                    {{ material.title }}
+                </a>
+            </h2>
+
+            <p class="small text-secondary">
+                {{ material.chapter.subject.name }} /
+                {{ material.chapter.name }}
+            </p>
+
+            {% if material.description %}
+                <p>{{ material.description }}</p>
+            {% endif %}
+
+            {% if material.file %}
+                <a
+                    href="{{ material.file.url }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-outline-primary btn-sm"
+                >
+                    Open file
+                </a>
+            {% endif %}
+        </article>
+    {% empty %}
+        <div class="empty-state">
+            <h2 class="h5">No matching materials</h2>
+            <p class="text-secondary mb-0">
+                Try a different search term or material type.
+            </p>
+        </div>
+    {% endfor %}
+</div>
+
+{% if page_obj.has_other_pages %}
+    <nav class="mt-4" aria-label="Search result pages">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a
+                        class="page-link"
+                        href="?q={{ query|urlencode }}&amp;type={{ selected_type|urlencode }}&amp;page={{ page_obj.previous_page_number }}"
+                    >
+                        Previous
+                    </a>
+                </li>
+            {% endif %}
+
+            <li class="page-item disabled">
+                <span class="page-link">
+                    Page {{ page_obj.number }} of
+                    {{ page_obj.paginator.num_pages }}
+                </span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a
+                        class="page-link"
+                        href="?q={{ query|urlencode }}&amp;type={{ selected_type|urlencode }}&amp;page={{ page_obj.next_page_number }}"
+                    >
+                        Next
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,21 @@
+
+from django.urls import path
+
+from . import views
+
+app_name = "catalog"
+
+urlpatterns = [
+    path("", views.home, name="home"),
+    path("search/", views.search, name="search"),
+    path(
+        "subjects/<slug:subject_slug>/",
+        views.subject_detail,
+        name="subject_detail",
+    ),
+    path(
+        "subjects/<slug:subject_slug>/chapters/<slug:chapter_slug>/",
+        views.chapter_detail,
+        name="chapter_detail",
+    ),
+]

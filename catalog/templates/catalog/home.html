@@ -1,0 +1,92 @@
+
+{% extends "catalog/base.html" %}
+
+{% block title %}iTestPapers | Study Resources{% endblock %}
+
+{% block content %}
+<section class="hero mb-5">
+    <div class="eyebrow text-warning mb-3">Your learning library</div>
+    <h1 class="display-5 fw-bold mb-3">
+        Find the right resources for your studies.
+    </h1>
+    <p class="lead mb-4">
+        Explore subjects, chapter-wise notes, question papers and practice materials.
+    </p>
+
+    <a href="{% url 'catalog:search' %}" class="btn btn-warning btn-lg">
+        Explore Study Materials
+    </a>
+</section>
+
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <div class="eyebrow">Browse the library</div>
+            <h2 class="section-heading h3 mb-0">Explore Subjects</h2>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        {% for subject in subjects %}
+            <div class="col-12 col-sm-6 col-lg-4">
+                <article class="content-card p-4">
+                    <div class="eyebrow mb-2">Subject</div>
+                    <h3 class="h5 fw-bold">
+                        <a href="{% url 'catalog:subject_detail' subject.slug %}">
+                            {{ subject.name }}
+                        </a>
+                    </h3>
+                    <p class="text-secondary mb-0">
+                        {{ subject.description|default:"Browse chapters and study materials."|truncatewords:20 }}
+                    </p>
+                </article>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="empty-state">
+                    <h3 class="h5">No subjects available yet</h3>
+                    <p class="text-secondary mb-0">
+                        Add active subjects through Django Admin to populate the library.
+                    </p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section>
+    <div class="mb-4">
+        <div class="eyebrow">Recently featured content</div>
+        <h2 class="section-heading h3">Study Materials</h2>
+    </div>
+
+    <div class="row g-3">
+        {% for material in featured_materials %}
+            <div class="col-12 col-md-6 col-lg-4">
+                <article class="content-card p-4">
+                    <div class="eyebrow mb-2">
+                        {{ material.get_material_type_display }}
+                    </div>
+                    <h3 class="h5">
+                        <a href="{% url 'catalog:chapter_detail' material.chapter.subject.slug material.chapter.slug %}">
+                            {{ material.title }}
+                        </a>
+                    </h3>
+                    <p class="text-secondary small mb-3">
+                        {{ material.chapter.subject.name }} / {{ material.chapter.name }}
+                    </p>
+                    <span class="badge text-bg-light">
+                        {% if material.is_free %}Free{% else %}Paid{% endif %}
+                    </span>
+                </article>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <p class="text-secondary">
+                    Published materials will appear here when available.
+                </p>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

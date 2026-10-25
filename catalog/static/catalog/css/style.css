@@ -1,0 +1,104 @@
+
+:root {
+    --brand: #173b68;
+    --brand-dark: #102a4a;
+    --page-bg: #f6f8fb;
+    --text-main: #202b3c;
+    --border-soft: #e4e9f0;
+}
+
+body {
+    background: var(--page-bg);
+    color: var(--text-main);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.65;
+}
+
+.site-navbar {
+    background: var(--brand-dark);
+}
+
+.navbar-brand {
+    letter-spacing: -0.4px;
+}
+
+.hero {
+    background: linear-gradient(135deg, #173b68, #28649a);
+    color: white;
+    padding: clamp(2rem, 6vw, 4.5rem);
+    border-radius: 1.25rem;
+}
+
+.hero p {
+    max-width: 620px;
+    color: #e0eaf5;
+}
+
+.section-heading {
+    font-weight: 750;
+    letter-spacing: -0.5px;
+}
+
+.content-card {
+    height: 100%;
+    background: white;
+    border: 1px solid var(--border-soft);
+    border-radius: 0.9rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.content-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgb(20 40 70 / 8%);
+}
+
+.content-card a {
+    color: var(--brand);
+    text-decoration: none;
+}
+
+.content-card a:hover {
+    text-decoration: underline;
+}
+
+.eyebrow {
+    color: #63758c;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.breadcrumb a {
+    color: var(--brand);
+    text-decoration: none;
+}
+
+.material-row {
+    background: white;
+    border: 1px solid var(--border-soft);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+}
+
+.site-footer {
+    background: white;
+    border-top: 1px solid var(--border-soft);
+}
+
+.empty-state {
+    background: white;
+    border: 1px dashed #cbd5e1;
+    border-radius: 0.9rem;
+    padding: 2rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .content-card {
+        transition: none;
+    }
+
+    .content-card:hover {
+        transform: none;
+    }
+}
