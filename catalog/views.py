@@ -1,7 +1,9 @@
+from io import BytesIO
 
-from django.db.models import Q,Count
-from django.shortcuts import get_object_or_404, render
+from django.db.models import Q, Count
 from django.core.paginator import Paginator
+from django.http import FileResponse, Http404
+from django.shortcuts import get_object_or_404, render
 
 from .models import Chapter, StudyMaterial, Subject
 
@@ -30,13 +32,10 @@ def subject_detail(request, subject_slug):
         slug=subject_slug,
         is_active=True,
     )
-    chapters = (
-        subject.chapters.filter(is_active=True)
-        .annotate(
-            material_count=Count(
-                "materials",
-                filter=Q(materials__is_published=True),
-            )
+    chapters = subject.chapters.filter(is_active=True).annotate(
+        material_count=Count(
+            "materials",
+            filter=Q(materials__is_published=True),
         )
     )
 
@@ -55,7 +54,6 @@ def chapter_detail(request, subject_slug, chapter_slug):
         subject__is_active=True,
         is_active=True,
     )
-
     materials = chapter.materials.filter(is_published=True)
 
     return render(
@@ -64,6 +62,27 @@ def chapter_detail(request, subject_slug, chapter_slug):
         {"chapter": chapter, "materials": materials},
     )
 
+
+def material_pdf(request, material_id):
+    material = get_object_or_404(
+        StudyMaterial,
+        pk=material_id,
+        is_published=True,
+        chapter__is_active=True,
+        chapter__subject__is_active=True,
+    )
+
+    if not material.file_data:
+        raise Http404("PDF is not available.")
+
+    filename = material.file_name or f"study-material-{material.pk}.pdf"
+    response = FileResponse(
+        BytesIO(bytes(material.file_data)),
+        content_type="application/pdf",
+        filename=filename,
+    )
+    response["X-Content-Type-Options"] = "nosniff"
+    return response
 
 
 def search(request):
@@ -101,4 +120,3 @@ def search(request):
             "material_types": StudyMaterial.MaterialType.choices,
         },
     )
-

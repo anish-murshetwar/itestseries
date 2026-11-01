@@ -1,7 +1,40 @@
-
+from django import forms
 from django.contrib import admin
+from django.core.exceptions import ValidationError
 
 from .models import Chapter, StudyMaterial, Subject
+
+MAX_PDF_SIZE = 10 * 1024 * 1024  # 10 MB
+
+
+class StudyMaterialAdminForm(forms.ModelForm):
+    pdf_upload = forms.FileField(
+        required=False,
+        label="PDF file",
+        help_text="Upload a PDF (maximum 10 MB). A new upload replaces the stored PDF.",
+    )
+
+    class Meta:
+        model = StudyMaterial
+        exclude = ("file",)
+
+    def clean_pdf_upload(self):
+        uploaded = self.cleaned_data.get("pdf_upload")
+        if not uploaded:
+            return uploaded
+
+        if uploaded.size > MAX_PDF_SIZE:
+            raise ValidationError("PDF must be 10 MB or smaller.")
+
+        if not uploaded.name.lower().endswith(".pdf"):
+            raise ValidationError("Only PDF files are allowed.")
+
+        header = uploaded.read(5)
+        uploaded.seek(0)
+        if header != b"%PDF-":
+            raise ValidationError("The uploaded file does not appear to be a valid PDF.")
+
+        return uploaded
 
 
 @admin.register(Subject)
@@ -23,13 +56,26 @@ class ChapterAdmin(admin.ModelAdmin):
 
 @admin.register(StudyMaterial)
 class StudyMaterialAdmin(admin.ModelAdmin):
+    form = StudyMaterialAdminForm
     list_display = (
         "title",
         "chapter",
         "material_type",
         "is_free",
         "is_published",
+        "file_size",
     )
     list_filter = ("material_type", "is_free", "is_published")
     search_fields = ("title", "chapter__name", "chapter__subject__name")
     prepopulated_fields = {"slug": ("title",)}
+    readonly_fields = ("file_size",)
+
+    def save_model(self, request, obj, form, change):
+        uploaded = form.cleaned_data.get("pdf_upload")
+        if uploaded:
+            obj.file_data = uploaded.read()
+            obj.file_name = uploaded.name
+            obj.file_size = uploaded.size
+            # Do not keep writing new files to Render's ephemeral filesystem.
+            obj.file = ""
+        super().save_model(request, obj, form, change)

@@ -1,6 +1,4 @@
-
 from django.db import models
-from django.utils.text import slugify
 
 
 class Subject(models.Model):
@@ -69,10 +67,19 @@ class StudyMaterial(models.Model):
         default=MaterialType.NOTES,
     )
     description = models.TextField(blank=True)
+
+    # New persistent storage: PDF bytes are stored in PostgreSQL.
+    file_data = models.BinaryField(blank=True, null=True, editable=False)
+    file_name = models.CharField(max_length=255, blank=True)
+    file_size = models.PositiveBigIntegerField(default=0)
+
+    # Retained temporarily so existing database rows migrate safely.
+    # New uploads use file_data, not this local-filesystem field.
     file = models.FileField(
         upload_to="study_materials/%Y/%m/",
         blank=True,
     )
+
     is_free = models.BooleanField(default=True)
     is_published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

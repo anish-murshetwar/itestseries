@@ -1,4 +1,3 @@
-
 from django.urls import path
 
 from . import views
@@ -8,6 +7,11 @@ app_name = "catalog"
 urlpatterns = [
     path("", views.home, name="home"),
     path("search/", views.search, name="search"),
+    path(
+        "materials/<int:material_id>/pdf/",
+        views.material_pdf,
+        name="material_pdf",
+    ),
     path(
         "subjects/<slug:subject_slug>/",
         views.subject_detail,
