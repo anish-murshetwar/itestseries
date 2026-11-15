@@ -1,77 +1,52 @@
 {% extends "catalog/base.html" %}
 
-{% block title %}{{ chapter.name }} | {{ chapter.subject.name }} | iTestPapers{% endblock %}
+{% block title %}{{ subject.name }} | {{ subject.school_class.name }} | iTestSeries{% endblock %}
 
 {% block content %}
 <nav aria-label="breadcrumb" class="mb-4">
     <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'catalog:home' %}">Home</a></li>
+        <li class="breadcrumb-item">{{ chapter.subject.school_class.board.name }}</li>
+        <li class="breadcrumb-item">{{ chapter.subject.school_class.name }}</li>
         <li class="breadcrumb-item">
-            <a href="{% url 'catalog:home' %}">Home</a>
-        </li>
-        <li class="breadcrumb-item">
-            <a href="{% url 'catalog:subject_detail' chapter.subject.slug %}">
-                {{ chapter.subject.name }}
-            </a>
+            <a href="{% url 'catalog:subject_detail' chapter.subject.school_class.board.slug chapter.subject.school_class.slug chapter.subject.slug %}">{{ chapter.subject.name }}</a>
         </li>
         <li class="breadcrumb-item active">{{ chapter.name }}</li>
     </ol>
 </nav>
-
 <header class="mb-5">
-    <div class="eyebrow">{{ chapter.subject.name }}</div>
+    <div class="eyebrow">{{ chapter.subject.school_class.name }} · {{ chapter.subject.name }}</div>
     <h1 class="display-6 fw-bold">{{ chapter.name }}</h1>
-    <p class="text-secondary">
-        Browse published notes, question papers and practice materials.
-    </p>
+    <p class="text-secondary">Browse published notes, question papers and practice materials.</p>
 </header>
-
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
     <h2 class="section-heading h4 mb-0">Available Materials</h2>
-    <a href="{% url 'catalog:search' %}" class="btn btn-outline-primary btn-sm">
-        Search all materials
-    </a>
+    <a href="{% url 'catalog:search' %}" class="btn btn-outline-primary btn-sm">Search all materials</a>
 </div>
-
 <div class="d-flex flex-column gap-3">
     {% for material in materials %}
-        <article class="material-row">
-            <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
-                <div>
-                    <div class="eyebrow mb-2">
-                        {{ material.get_material_type_display }}
-                    </div>
-                    <h3 class="h5 fw-bold mb-2">{{ material.title }}</h3>
-
-                    {% if material.description %}
-                        <p class="text-secondary mb-2">{{ material.description }}</p>
-                    {% endif %}
-
-                    <span class="badge {% if material.is_free %}text-bg-success{% else %}text-bg-secondary{% endif %}">
-                        {% if material.is_free %}Free{% else %}Paid{% endif %}
-                    </span>
-                </div>
-
-                <div class="d-flex align-items-center">
-                    {% if material.file_data %}
-                        <a href="{% url 'catalog:material_pdf' material.pk %}"
-                           target="_blank"
-                           rel="noopener noreferrer"
-                           class="btn btn-primary">
-                            Open file
-                        </a>
-                    {% else %}
-                        <span class="text-secondary small">File not uploaded</span>
-                    {% endif %}
-                </div>
+    <article class="material-row">
+        <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+            <div>
+                <div class="eyebrow mb-2">{{ material.get_material_type_display }}</div>
+                <h3 class="h5 fw-bold mb-2">{{ material.title }}</h3>
+                {% if material.description %}<p class="text-secondary mb-2">{{ material.description }}</p>{% endif %}
+                <span class="badge {% if material.is_free %}text-bg-success{% else %}text-bg-secondary{% endif %}">{% if material.is_free %}Free{% else %}Paid{% endif %}</span>
             </div>
-        </article>
-    {% empty %}
-        <div class="empty-state">
-            <h3 class="h5">No published materials yet</h3>
-            <p class="text-secondary mb-0">
-                Check back when materials have been published for this chapter.
-            </p>
+            <div class="d-flex align-items-center">
+                {% if material.file_data %}
+                <a href="{% url 'catalog:material_pdf' material.pk %}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Open file</a>
+                {% else %}
+                <span class="text-secondary small">File not uploaded</span>
+                {% endif %}
+            </div>
         </div>
+    </article>
+    {% empty %}
+    <div class="empty-state">
+        <h3 class="h5">No published materials yet</h3>
+        <p class="text-secondary mb-0">Check back when materials have been published for this chapter.</p>
+    </div>
     {% endfor %}
 </div>
 {% endblock %}

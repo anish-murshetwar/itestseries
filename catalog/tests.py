@@ -2,12 +2,27 @@
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Chapter, StudyMaterial, Subject
+from .models import Board, Chapter, SchoolClass, StudyMaterial, Subject
 
 
 class CatalogTestDataMixin:
     def setUp(self):
+        self.board = Board.objects.create(
+            name="ICSE",
+            slug="icse",
+            is_active=True,
+        )
+
+        self.school_class = SchoolClass.objects.create(
+            board=self.board,
+            name="Class 10",
+            slug="class-10",
+            order=10,
+            is_active=True,
+        )
+
         self.subject = Subject.objects.create(
+            school_class=self.school_class,
             name="Mathematics",
             slug="mathematics",
             description="Mathematics study resources",
@@ -32,8 +47,16 @@ class CatalogTestDataMixin:
             is_published=True,
         )
 
+        self.chapter_url_kwargs = {
+            "board_slug": self.board.slug,
+            "class_slug": self.school_class.slug,
+            "subject_slug": self.subject.slug,
+            "chapter_slug": self.chapter.slug,
+        }
+
 
 class HomepageTests(CatalogTestDataMixin, TestCase):
+
     def test_homepage_returns_success(self):
         response = self.client.get(reverse("catalog:home"))
 
@@ -50,14 +73,12 @@ class HomepageTests(CatalogTestDataMixin, TestCase):
 
 
 class ChapterPageTests(CatalogTestDataMixin, TestCase):
+
     def test_chapter_page_shows_published_material(self):
         response = self.client.get(
             reverse(
                 "catalog:chapter_detail",
-                kwargs={
-                    "subject_slug": "mathematics",
-                    "chapter_slug": "algebra",
-                },
+                kwargs=self.chapter_url_kwargs,
             )
         )
 
@@ -71,10 +92,7 @@ class ChapterPageTests(CatalogTestDataMixin, TestCase):
         response = self.client.get(
             reverse(
                 "catalog:chapter_detail",
-                kwargs={
-                    "subject_slug": "mathematics",
-                    "chapter_slug": "algebra",
-                },
+                kwargs=self.chapter_url_kwargs,
             )
         )
 
@@ -87,10 +105,7 @@ class ChapterPageTests(CatalogTestDataMixin, TestCase):
         response = self.client.get(
             reverse(
                 "catalog:chapter_detail",
-                kwargs={
-                    "subject_slug": "mathematics",
-                    "chapter_slug": "algebra",
-                },
+                kwargs=self.chapter_url_kwargs,
             )
         )
 
@@ -98,6 +113,7 @@ class ChapterPageTests(CatalogTestDataMixin, TestCase):
 
 
 class MaterialSearchTests(CatalogTestDataMixin, TestCase):
+
     def test_search_finds_material_by_title(self):
         response = self.client.get(
             reverse("catalog:search"),

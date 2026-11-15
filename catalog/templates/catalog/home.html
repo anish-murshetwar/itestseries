@@ -1,83 +1,121 @@
 {% extends "catalog/base.html" %}
-
-{% block title %}iTestPapers | Study Resources{% endblock %}
-
+{% block title %}ICSE Class 9 & 10 | iTestSeries{% endblock %}
+{% block meta_description %}ICSE Class 9 and 10 Biology and Chemistry notes, test papers and study materials.{% endblock %}
 {% block content %}
 <section class="hero mb-5">
-    <div class="eyebrow text-warning mb-3">Your learning library</div>
-    <h1 class="display-5 fw-bold mb-3">
-        Find the right resources for your studies.
-    </h1>
-    <p class="lead mb-4">
-        Explore subjects, chapter-wise notes, question papers and practice materials.
-    </p>
-    <a href="{% url 'catalog:search' %}" class="btn btn-warning btn-lg">
-        Explore Study Materials
-    </a>
-</section>
-
-<section class="mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <div class="eyebrow">Browse the library</div>
-            <h2 class="section-heading h3 mb-0">Explore Subjects</h2>
+    <div class="hero-content">
+        <div class="eyebrow mb-3">ICSE BOARD PREPARATION</div>
+        <h1>ICSE Class 9 &amp; 10 <span>Test Papers, Notes</span> &amp; Study Materials</h1>
+        <p>Chapter-wise Biology and Chemistry resources based on the ICSE syllabus. Start preparing with a free topic today.</p>
+        <div class="hero-actions">
+            <a href="{% url 'catalog:search' %}" class="btn btn-primary">Explore study materials</a>
+            <a href="#subjects" class="btn btn-outline-primary">View subjects</a>
         </div>
     </div>
+    <div class="hero-art" aria-hidden="true">
+        <svg viewBox="0 0 520 390" role="img">
+            <ellipse cx="265" cy="350" rx="210" ry="20" fill="#dcecf7"/>
+            <rect x="80" y="270" width="360" height="22" rx="8" fill="#e9a94e"/>
+            <path d="M112 292h18l-12 65h-18zm280 0h18l14 65h-18z" fill="#c47b43"/>
+            <rect x="130" y="226" width="250" height="44" rx="8" fill="#2c8bc7"/>
+            <rect x="150" y="204" width="210" height="26" rx="7" fill="#55b9d9"/>
+            <path d="M205 211q45-34 90 0v43q-45-29-90 0z" fill="#fff" stroke="#d4e4ee" stroke-width="3"/>
+            <path d="M250 214v39" stroke="#9bb8c8" stroke-width="2"/>
+            <path d="M195 190l-8-55q-2-15 13-19l16-3 12 73z" fill="#f3a24d"/>
+            <path d="M290 185l12-70 20 4q15 3 12 18l-10 54z" fill="#f3a24d"/>
+            <path d="M205 145q-8-52 42-62 54-10 66 37l-7 54-96 2z" fill="#263b59"/>
+            <ellipse cx="260" cy="125" rx="42" ry="49" fill="#f5a36d"/>
+            <path d="M219 119q-8-51 43-57 42-4 52 36-24-12-39-26-20 25-56 25z" fill="#1e2d45"/>
+            <circle cx="246" cy="127" r="3.5" fill="#263b59"/><circle cx="276" cy="127" r="3.5" fill="#263b59"/>
+            <path d="M249 148q12 10 24 0" fill="none" stroke="#9a4f45" stroke-width="3" stroke-linecap="round"/>
+            <path d="M213 180q47-20 94 0l22 44H190z" fill="#3989b8"/>
+            <path d="M225 190l-30 34m99-34 28 34" stroke="#f5a36d" stroke-width="12" stroke-linecap="round"/>
+            <rect x="52" y="90" width="78" height="105" rx="10" fill="#83d0e4"/>
+            <path d="M68 115h45m-45 15h35m-35 15h42" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+            <circle cx="414" cy="115" r="34" fill="#e8f5df"/>
+            <path d="M414 92v46m-23-23h46m-39-16 32 32m0-32-32 32" stroke="#54a96c" stroke-width="3" stroke-linecap="round"/>
+            <path d="M90 235q-18-30 5-47 22 18 5 47m-5-4v24" fill="#70bd80"/>
+            <path d="M425 235q-18-30 5-47 22 18 5 47m-5-4v24" fill="#70bd80"/>
+        </svg>
+        <span class="hero-note">Learn · Practise · Improve</span>
+    </div>
+</section>
+
+{% for board in boards %}
+<section class="subjects-section mb-5" id="subjects">
+    <div class="section-intro">
+        <div>
+            <div class="eyebrow mb-2">{{ board.name }}</div>
+            <h2 class="section-heading mb-0">Choose your subject</h2>
+        </div>
+        <p>Chapter-wise resources for your class.</p>
+    </div>
     <div class="row g-3">
-        {% for subject in subjects %}
-            <div class="col-12 col-sm-6 col-lg-4">
-                <article class="content-card p-4">
-                    <div class="eyebrow mb-2">Subject</div>
-                    <h3 class="h5 fw-bold">
-                        <a href="{% url 'catalog:subject_detail' subject.slug %}">
-                            {{ subject.name }}
-                        </a>
-                    </h3>
-                    <p class="text-secondary mb-0">
-                        {{ subject.description|default:"Browse chapters and study materials."|truncatewords:20 }}
-                    </p>
+        {% for school_class in board.classes.all %}
+        {% if school_class.is_active %}
+            {% for subject in school_class.subjects.all %}
+            {% if subject.is_active %}
+            <div class="col-12 col-sm-6 col-xl-3">
+                <article class="subject-card h-100">
+                    <div class="subject-icon {% if subject.name|lower == 'biology' %}biology-icon{% else %}chemistry-icon{% endif %}" aria-hidden="true">
+                        {% if subject.name|lower == 'biology' %}✳{% else %}⚗{% endif %}
+                    </div>
+                    <div class="eyebrow mb-2">{{ school_class.name }}</div>
+                    <h3>{{ subject.name }}</h3>
+                    <p>{{ subject.description|default:"Explore chapter-wise notes, questions and study materials."|truncatewords:16 }}</p>
+                    <a class="subject-link" href="{% url 'catalog:subject_detail' board.slug school_class.slug subject.slug %}">
+                        View chapters <span aria-hidden="true">→</span>
+                    </a>
                 </article>
             </div>
+            {% endif %}
+            {% endfor %}
+        {% endif %}
         {% empty %}
-            <div class="col-12">
-                <div class="empty-state">
-                    <h3 class="h5">No subjects available yet</h3>
-                    <p class="text-secondary mb-0">
-                        Add active subjects through Django Admin to populate the library.
-                    </p>
-                </div>
-            </div>
+        <div class="col-12"><div class="empty-state">Classes will appear here when added.</div></div>
         {% endfor %}
     </div>
 </section>
+{% empty %}
+<div class="empty-state">Boards will appear here when added through Django Admin.</div>
+{% endfor %}
 
-<section>
-    <div class="mb-4">
-        <div class="eyebrow">Recently featured content</div>
-        <h2 class="section-heading h3">Study Materials</h2>
+<section class="how-section mb-5">
+    <div class="text-center mb-4">
+        <div class="eyebrow mb-2">Simple process</div>
+        <h2 class="section-heading">How it works</h2>
+        <p class="section-subtitle">Get started in three simple steps.</p>
+    </div>
+    <div class="row g-3">
+        <div class="col-12 col-md-4"><article class="step-card"><span>01</span><h3>Choose your class</h3><p>Select ICSE Class 9 or 10.</p></article></div>
+        <div class="col-12 col-md-4"><article class="step-card"><span>02</span><h3>Explore chapters</h3><p>Find Biology and Chemistry topics.</p></article></div>
+        <div class="col-12 col-md-4"><article class="step-card"><span>03</span><h3>Study and practise</h3><p>Access available notes and papers.</p></article></div>
+    </div>
+</section>
+
+<section class="materials-section">
+    <div class="section-intro">
+        <div>
+            <div class="eyebrow mb-2">Recently featured</div>
+            <h2 class="section-heading mb-0">Study materials</h2>
+        </div>
+        <a class="section-more" href="{% url 'catalog:search' %}">Browse all materials →</a>
     </div>
     <div class="row g-3">
         {% for material in featured_materials %}
-            <div class="col-12 col-md-6 col-lg-4">
-                <article class="content-card p-4">
+        <div class="col-12 col-md-6 col-lg-4">
+            <article class="material-card h-100">
+                <div class="document-preview" aria-hidden="true"><span>PDF</span><div class="document-lines"></div></div>
+                <div class="material-card-body">
                     <div class="eyebrow mb-2">{{ material.get_material_type_display }}</div>
-                    <h3 class="h5">
-                        <a href="{% url 'catalog:chapter_detail' material.chapter.subject.slug material.chapter.slug %}">
-                            {{ material.title }}
-                        </a>
-                    </h3>
-                    <p class="text-secondary small mb-3">
-                        {{ material.chapter.subject.name }} / {{ material.chapter.name }}
-                    </p>
-                    <span class="badge text-bg-light">
-                        {% if material.is_free %}Free{% else %}Paid{% endif %}
-                    </span>
-                </article>
-            </div>
+                    <h3><a href="{% url 'catalog:chapter_detail' material.chapter.subject.school_class.board.slug material.chapter.subject.school_class.slug material.chapter.subject.slug material.chapter.slug %}">{{ material.title }}</a></h3>
+                    <p>{{ material.chapter.subject.school_class.name }} · {{ material.chapter.subject.name }} · {{ material.chapter.name }}</p>
+                    <span class="badge rounded-pill text-bg-light">{% if material.is_free %}Free{% else %}Paid{% endif %}</span>
+                </div>
+            </article>
+        </div>
         {% empty %}
-            <div class="col-12">
-                <p class="text-secondary">Published materials will appear here when available.</p>
-            </div>
+        <div class="col-12"><div class="empty-state">Published materials will appear here when available.</div></div>
         {% endfor %}
     </div>
 </section>

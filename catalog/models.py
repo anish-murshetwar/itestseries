@@ -1,9 +1,9 @@
 from django.db import models
 
 
-class Subject(models.Model):
-    name = models.CharField(max_length=150, unique=True)
-    slug = models.SlugField(max_length=170, unique=True)
+class Board(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=120, unique=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -14,6 +14,68 @@ class Subject(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class SchoolClass(models.Model):
+    board = models.ForeignKey(
+        Board,
+        on_delete=models.PROTECT,
+        related_name="classes",
+    )
+    name = models.CharField(max_length=50)
+    slug = models.SlugField(max_length=60)
+    order = models.PositiveIntegerField(default=1)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["order", "name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["board", "slug"],
+                name="uq_class_board_slug",
+            ),
+            models.UniqueConstraint(
+                fields=["board", "order"],
+                name="uq_class_board_order",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.board.name} - {self.name}"
+
+
+class Subject(models.Model):
+    school_class = models.ForeignKey(
+        SchoolClass,
+        on_delete=models.PROTECT,
+        related_name="subjects",
+        null=True,
+        blank=True,
+    )
+    name = models.CharField(max_length=150)
+    slug = models.SlugField(max_length=170)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["school_class", "name"],
+                name="uq_subject_class_name",
+            ),
+            models.UniqueConstraint(
+                fields=["school_class", "slug"],
+                name="uq_subject_class_slug",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.school_class} - {self.name}" if self.school_class else self.name
 
 
 class Chapter(models.Model):

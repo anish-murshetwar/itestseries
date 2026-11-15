@@ -1,0 +1,26 @@
+/* Homepage refinements */
+.hero {
+    min-height: 0;
+    padding: clamp(2rem, 4vw, 3.25rem);
+    margin-bottom: 2.5rem !important;
+}
+.hero h1 {
+    max-width: 650px;
+    font-size: clamp(2rem, 3.6vw, 3.1rem);
+    line-height: 1.12;
+}
+.hero p {
+    max-width: 560px;
+    font-size: 1rem;
+    margin-bottom: 1.25rem;
+}
+.hero::after {
+    width: 230px;
+    height: 230px;
+}
+.page-shell {
+    padding-top: clamp(1.5rem, 3vw, 2.5rem);
+}
+.content-card {
+    min-height: 150px;
+}

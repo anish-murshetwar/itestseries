@@ -2,7 +2,7 @@ from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 
-from .models import Chapter, StudyMaterial, Subject
+from .models import Board, Chapter, SchoolClass, StudyMaterial, Subject
 
 MAX_PDF_SIZE = 10 * 1024 * 1024  # 10 MB
 
@@ -37,18 +37,35 @@ class StudyMaterialAdminForm(forms.ModelForm):
         return uploaded
 
 
-@admin.register(Subject)
-class SubjectAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug", "is_active", "updated_at")
+@admin.register(Board)
+class BoardAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug", "is_active")
     list_filter = ("is_active",)
     search_fields = ("name",)
+    prepopulated_fields = {"slug": ("name",)}
+
+
+@admin.register(SchoolClass)
+class SchoolClassAdmin(admin.ModelAdmin):
+    list_display = ("name", "board", "order", "is_active")
+    list_filter = ("board", "is_active")
+    search_fields = ("name", "board__name")
+    prepopulated_fields = {"slug": ("name",)}
+    ordering = ("board", "order")
+
+
+@admin.register(Subject)
+class SubjectAdmin(admin.ModelAdmin):
+    list_display = ("name", "school_class", "is_active", "updated_at")
+    list_filter = ("school_class__board", "school_class", "is_active")
+    search_fields = ("name", "school_class__name", "school_class__board__name")
     prepopulated_fields = {"slug": ("name",)}
 
 
 @admin.register(Chapter)
 class ChapterAdmin(admin.ModelAdmin):
     list_display = ("name", "subject", "order", "is_active")
-    list_filter = ("subject", "is_active")
+    list_filter = ("subject__school_class__board", "subject__school_class", "subject", "is_active")
     search_fields = ("name", "subject__name")
     prepopulated_fields = {"slug": ("name",)}
     ordering = ("subject", "order")
@@ -65,8 +82,19 @@ class StudyMaterialAdmin(admin.ModelAdmin):
         "is_published",
         "file_size",
     )
-    list_filter = ("material_type", "is_free", "is_published")
-    search_fields = ("title", "chapter__name", "chapter__subject__name")
+    list_filter = (
+        "material_type",
+        "is_free",
+        "is_published",
+        "chapter__subject__school_class__board",
+        "chapter__subject__school_class",
+    )
+    search_fields = (
+        "title",
+        "chapter__name",
+        "chapter__subject__name",
+        "chapter__subject__school_class__board__name",
+    )
     prepopulated_fields = {"slug": ("title",)}
     readonly_fields = ("file_size",)
 
@@ -76,6 +104,10 @@ class StudyMaterialAdmin(admin.ModelAdmin):
             obj.file_data = uploaded.read()
             obj.file_name = uploaded.name
             obj.file_size = uploaded.size
-            # Do not keep writing new files to Render's ephemeral filesystem.
             obj.file = ""
         super().save_model(request, obj, form, change)
+
+# iTestSeries Django Admin branding
+admin.site.site_header = "iTestSeries Administration"
+admin.site.site_title = "iTestSeries Admin"
+admin.site.index_title = "Manage iTestSeries"

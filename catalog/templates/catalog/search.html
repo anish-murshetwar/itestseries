@@ -1,6 +1,6 @@
 {% extends "catalog/base.html" %}
 
-{% block title %}Search Study Materials | iTestPapers{% endblock %}
+{% block title %}Search Study Materials | iTestSeries{% endblock %}
 
 {% block content %}
 <header class="mb-4">
@@ -45,7 +45,7 @@
             <div class="eyebrow mb-2">{{ material.get_material_type_display }}</div>
             <h2 class="h5 fw-bold">
                 <a class="text-decoration-none"
-                   href="{% url 'catalog:chapter_detail' material.chapter.subject.slug material.chapter.slug %}">
+                   href="{% url 'catalog:chapter_detail' material.chapter.subject.school_class.board.slug material.chapter.subject.school_class.slug material.chapter.subject.slug material.chapter.slug %}"
                     {{ material.title }}
                 </a>
             </h2>

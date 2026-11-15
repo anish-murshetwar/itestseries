@@ -1,48 +1,35 @@
-
 {% extends "catalog/base.html" %}
 
-{% block title %}{{ subject.name }} | iTestPapers{% endblock %}
+{% block title %}{{ subject.name }} | {{ subject.school_class.name }} | iTestSeries{% endblock %}
 
 {% block content %}
 <nav aria-label="breadcrumb" class="mb-4">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-            <a href="{% url 'catalog:home' %}">Home</a>
-        </li>
+        <li class="breadcrumb-item"><a href="{% url 'catalog:home' %}">Home</a></li>
+        <li class="breadcrumb-item">{{ subject.school_class.board.name }}</li>
+        <li class="breadcrumb-item">{{ subject.school_class.name }}</li>
         <li class="breadcrumb-item active">{{ subject.name }}</li>
     </ol>
 </nav>
-
 <header class="mb-5">
-    <div class="eyebrow">Subject library</div>
+    <div class="eyebrow">{{ subject.school_class.board.name }} · {{ subject.school_class.name }}</div>
     <h1 class="display-6 fw-bold">{{ subject.name }}</h1>
-    {% if subject.description %}
-        <p class="text-secondary">{{ subject.description }}</p>
-    {% endif %}
+    {% if subject.description %}<p class="text-secondary">{{ subject.description }}</p>{% endif %}
 </header>
-
 <h2 class="section-heading h4 mb-4">Chapters</h2>
-
 <div class="row g-3">
     {% for chapter in chapters %}
-        <div class="col-12 col-md-6 col-lg-4">
-            <article class="content-card p-4">
-                <div class="eyebrow mb-2">Chapter {{ chapter.order }}</div>
-                <h3 class="h5">
-                    <a href="{% url 'catalog:chapter_detail' subject.slug chapter.slug %}">
-                        {{ chapter.name }}
-                    </a>
-                </h3>
-                <p class="text-secondary small mb-0">
-                    {{ chapter.material_count }}
-                    published material{{ chapter.material_count|pluralize }}
-                </p>
-            </article>
-        </div>
+    <div class="col-12 col-md-6 col-lg-4">
+        <article class="content-card p-4">
+            <div class="eyebrow mb-2">Chapter {{ chapter.order }}</div>
+            <h3 class="h5">
+                <a href="{% url 'catalog:chapter_detail' subject.school_class.board.slug subject.school_class.slug subject.slug chapter.slug %}">{{ chapter.name }}</a>
+            </h3>
+            <p class="text-secondary small mb-0">{{ chapter.material_count }} published material{{ chapter.material_count|pluralize }}</p>
+        </article>
+    </div>
     {% empty %}
-        <div class="col-12">
-            <div class="empty-state">No active chapters are available yet.</div>
-        </div>
+    <div class="col-12"><div class="empty-state">No active chapters are available yet.</div></div>
     {% endfor %}
 </div>
 {% endblock %}

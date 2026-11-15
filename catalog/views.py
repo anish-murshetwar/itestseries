@@ -1,66 +1,70 @@
 from io import BytesIO
 
-from django.db.models import Q, Count
 from django.core.paginator import Paginator
+from django.db.models import Count, Q
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, render
 
-from .models import Chapter, StudyMaterial, Subject
+from .models import Board, Chapter, StudyMaterial, Subject
 
 
 def home(request):
-    subjects = Subject.objects.filter(is_active=True)
+    boards = Board.objects.filter(is_active=True).prefetch_related("classes__subjects")
     featured_materials = StudyMaterial.objects.filter(
         is_published=True,
         chapter__is_active=True,
         chapter__subject__is_active=True,
-    ).select_related("chapter", "chapter__subject")[:6]
+        chapter__subject__school_class__is_active=True,
+        chapter__subject__school_class__board__is_active=True,
+    ).select_related(
+        "chapter", "chapter__subject",
+        "chapter__subject__school_class",
+        "chapter__subject__school_class__board",
+    )[:6]
+    return render(request, "catalog/home.html", {
+        "boards": boards,
+        "featured_materials": featured_materials,
+    })
 
-    return render(
-        request,
-        "catalog/home.html",
-        {
-            "subjects": subjects,
-            "featured_materials": featured_materials,
-        },
-    )
 
-
-def subject_detail(request, subject_slug):
+def subject_detail(request, board_slug, class_slug, subject_slug):
     subject = get_object_or_404(
-        Subject,
+        Subject.objects.select_related("school_class__board"),
         slug=subject_slug,
+        school_class__slug=class_slug,
+        school_class__board__slug=board_slug,
         is_active=True,
+        school_class__is_active=True,
+        school_class__board__is_active=True,
     )
     chapters = subject.chapters.filter(is_active=True).annotate(
-        material_count=Count(
-            "materials",
-            filter=Q(materials__is_published=True),
-        )
+        material_count=Count("materials", filter=Q(materials__is_published=True))
     )
-
-    return render(
-        request,
-        "catalog/subject_detail.html",
-        {"subject": subject, "chapters": chapters},
-    )
+    return render(request, "catalog/subject_detail.html", {
+        "subject": subject,
+        "chapters": chapters,
+    })
 
 
-def chapter_detail(request, subject_slug, chapter_slug):
+def chapter_detail(request, board_slug, class_slug, subject_slug, chapter_slug):
     chapter = get_object_or_404(
-        Chapter.objects.select_related("subject"),
+        Chapter.objects.select_related(
+            "subject", "subject__school_class", "subject__school_class__board"
+        ),
         slug=chapter_slug,
         subject__slug=subject_slug,
+        subject__school_class__slug=class_slug,
+        subject__school_class__board__slug=board_slug,
         subject__is_active=True,
+        subject__school_class__is_active=True,
+        subject__school_class__board__is_active=True,
         is_active=True,
     )
     materials = chapter.materials.filter(is_published=True)
-
-    return render(
-        request,
-        "catalog/chapter_detail.html",
-        {"chapter": chapter, "materials": materials},
-    )
+    return render(request, "catalog/chapter_detail.html", {
+        "chapter": chapter,
+        "materials": materials,
+    })
 
 
 def material_pdf(request, material_id):
@@ -70,11 +74,11 @@ def material_pdf(request, material_id):
         is_published=True,
         chapter__is_active=True,
         chapter__subject__is_active=True,
+        chapter__subject__school_class__is_active=True,
+        chapter__subject__school_class__board__is_active=True,
     )
-
     if not material.file_data:
         raise Http404("PDF is not available.")
-
     filename = material.file_name or f"study-material-{material.pk}.pdf"
     response = FileResponse(
         BytesIO(bytes(material.file_data)),
@@ -88,13 +92,16 @@ def material_pdf(request, material_id):
 def search(request):
     query = request.GET.get("q", "").strip()
     material_type = request.GET.get("type", "")
-
     materials = StudyMaterial.objects.filter(
         is_published=True,
         chapter__is_active=True,
         chapter__subject__is_active=True,
-    ).select_related("chapter", "chapter__subject")
-
+        chapter__subject__school_class__is_active=True,
+        chapter__subject__school_class__board__is_active=True,
+    ).select_related(
+        "chapter", "chapter__subject", "chapter__subject__school_class",
+        "chapter__subject__school_class__board",
+    )
     if query:
         materials = materials.filter(
             Q(title__icontains=query)
@@ -102,21 +109,12 @@ def search(request):
             | Q(chapter__name__icontains=query)
             | Q(chapter__subject__name__icontains=query)
         )
-
-    valid_types = StudyMaterial.MaterialType.values
-    if material_type in valid_types:
+    if material_type in StudyMaterial.MaterialType.values:
         materials = materials.filter(material_type=material_type)
-
-    paginator = Paginator(materials, 12)
-    page_obj = paginator.get_page(request.GET.get("page"))
-
-    return render(
-        request,
-        "catalog/search.html",
-        {
-            "page_obj": page_obj,
-            "query": query,
-            "selected_type": material_type,
-            "material_types": StudyMaterial.MaterialType.choices,
-        },
-    )
+    page_obj = Paginator(materials, 12).get_page(request.GET.get("page"))
+    return render(request, "catalog/search.html", {
+        "page_obj": page_obj,
+        "query": query,
+        "selected_type": material_type,
+        "material_types": StudyMaterial.MaterialType.choices,
+    })
