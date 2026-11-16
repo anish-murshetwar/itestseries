@@ -20,6 +20,11 @@ chapter so students can find relevant resources more easily.
     through Django Admin.
 -   Upload PDF study materials through the admin interface, with file
     type and size validation.
+-   Register, log in, and log out using user accounts.
+-   Require users to log in before downloading study materials.
+-   Reset forgotten passwords through the password-reset workflow.
+-   Manage registered users through Django Admin, including searching,
+    filtering, activating, and deactivating accounts.
 
 ## Technology stack
 
@@ -27,8 +32,9 @@ chapter so students can find relevant resources more easily.
 -   **Database:** PostgreSQL
 -   **Frontend:** HTML, CSS, Bootstrap 5
 -   **Static files:** WhiteNoise
--   **Deployment:** Render (application hosting and PostgreSQL have been
-    configured during development)
+-   **Email:** Django email backend; SMTP configuration is prepared for
+    future Brevo integration.
+-   **Deployment:** Render (application hosting and PostgreSQL)
 
 ## Getting started
 
@@ -64,8 +70,23 @@ your local Django settings, including:
 
 -   `SECRET_KEY`
 -   `DEBUG`
--   `DATABASE_URL` (for PostgreSQL, if used by the current settings)
--   `ALLOWED_HOSTS` (if required by the current settings)
+-   `DATABASE_URL`
+-   `ALLOWED_HOSTS`
+-   `CSRF_TRUSTED_ORIGINS` (if required by the current settings)
+
+Email settings can also be configured through environment variables:
+
+-   `EMAIL_BACKEND`
+-   `EMAIL_HOST`
+-   `EMAIL_PORT`
+-   `EMAIL_HOST_USER`
+-   `EMAIL_HOST_PASSWORD`
+-   `DEFAULT_FROM_EMAIL`
+
+Local development can use Django's console email backend. In that mode,
+password-reset emails are printed in the development terminal rather
+than delivered to an inbox. Real email delivery requires valid SMTP
+credentials and a verified sender address.
 
 Do not commit `.env` or place real credentials in this README.
 
@@ -95,15 +116,18 @@ available at `http://127.0.0.1:8000/admin/`.
 
 ## Project status
 
-The project is under active development. The current implementation
-includes the study-material catalog, search, homepage, and Django admin
-management workflow. PDF page previews and further refinements are
-planned separately.
+The core study-material catalog, homepage, search, Django admin
+management, user registration, login, logout, authenticated PDF
+downloads, and password-reset workflow have been implemented and tested
+locally and on Render. Further refinements are planned separately.
 
 ## Security notes
 
 -   Keep `.env`, secret keys, database credentials, and other private
     configuration out of version control.
+-   Require authentication for study-material downloads.
+-   Use valid SMTP credentials and a verified sender before enabling
+    real password-reset email delivery.
 -   Do not upload private student information or copyrighted study
     material unless you have permission to host it.
 -   Review production settings before deploying changes.
