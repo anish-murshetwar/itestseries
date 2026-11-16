@@ -1,0 +1,39 @@
+
+{% extends "catalog/base.html" %}
+
+{% block title %}Login | iTestSeries{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="text-center mb-4">
+            <div class="eyebrow">Welcome back</div>
+            <h1 class="section-heading mt-2">Login to your account</h1>
+            <p class="text-secondary">Access your study materials.</p>
+        </div>
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            {{ form.as_p }}
+            <div class="text-end mb-3">
+                <a href="{% url 'catalog:password_reset' %}">
+                    Forgot Password?
+                </a>
+            </div>
+            {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary w-100 mt-3">
+                Login
+            </button>
+        </form>
+
+        <p class="text-center mt-4 mb-0">
+            Don't have an account?
+            <a href="{% url 'catalog:register' %}">Register</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

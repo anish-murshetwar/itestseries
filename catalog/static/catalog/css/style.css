@@ -428,3 +428,58 @@ a { color: var(--brand); }
     .hero-actions { flex-direction: column; }
     .hero-actions .btn { width: 100%; }
 }
+
+
+/* Authentication pages */
+.auth-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 2rem 0;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 480px;
+    padding: 2rem;
+    border: 1px solid var(--border-soft);
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: var(--shadow-card);
+}
+
+.auth-form p {
+    margin-bottom: 1rem;
+}
+
+.auth-form label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-weight: 650;
+}
+
+.auth-form input {
+    display: block;
+    width: 100%;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid var(--border-soft);
+    border-radius: 0.65rem;
+}
+
+.auth-form ul.errorlist {
+    color: #dc3545;
+    padding-left: 1.2rem;
+    font-size: 0.875rem;
+}
+
+.auth-form .helptext {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+@media (max-width: 575px) {
+    .auth-card {
+        padding: 1.4rem;
+    }
+}

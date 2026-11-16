@@ -4,9 +4,20 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, render
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
+from django.shortcuts import redirect
+from django import forms
 
 from .models import Board, Chapter, StudyMaterial, Subject
 
+
+class CustomUserCreationForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+
+    class Meta(UserCreationForm.Meta):
+        fields = ("username", "email")
 
 def home(request):
     boards = Board.objects.filter(is_active=True).prefetch_related("classes__subjects")
@@ -67,6 +78,7 @@ def chapter_detail(request, board_slug, class_slug, subject_slug, chapter_slug):
     })
 
 
+@login_required
 def material_pdf(request, material_id):
     material = get_object_or_404(
         StudyMaterial,
@@ -118,3 +130,19 @@ def search(request):
         "selected_type": material_type,
         "material_types": StudyMaterial.MaterialType.choices,
     })
+
+
+def register(request):
+    if request.user.is_authenticated:
+        return redirect("catalog:home")
+
+    if request.method == "POST":
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect("catalog:home")
+    else:
+        form = CustomUserCreationForm()
+
+    return render(request, "catalog/register.html", {"form": form})

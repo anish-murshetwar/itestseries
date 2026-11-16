@@ -1,6 +1,10 @@
 from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
+from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import UserAdmin
+
+User = get_user_model()
 
 from .models import Board, Chapter, SchoolClass, StudyMaterial, Subject
 
@@ -111,3 +115,28 @@ class StudyMaterialAdmin(admin.ModelAdmin):
 admin.site.site_header = "iTestSeries Administration"
 admin.site.site_title = "iTestSeries Admin"
 admin.site.index_title = "Manage iTestSeries"
+
+# Registered User Management
+admin.site.unregister(User)
+
+
+@admin.register(User)
+class CustomUserAdmin(UserAdmin):
+    list_display = (
+        "username",
+        "email",
+        "date_joined",
+        "last_login",
+        "is_active",
+        "is_staff",
+    )
+
+    list_filter = (
+        "is_active",
+        "is_staff",
+        "is_superuser",
+        "date_joined",
+    )
+
+    search_fields = ("username", "email")
+    ordering = ("-date_joined",)
